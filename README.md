@@ -2,7 +2,7 @@
 
 A real-time AI chatbot interface powered by Google Gemini Pro API, built with React, TypeScript, Tailwind CSS, and modern hooks. Designed with a macOS-style UI, typewriter animation, dark/light mode, and model switcher — suitable for production-ready use or portfolio projects.
 
-Watch Live | Deployed on Vercel [https://ai-chat-bot-app-seven.vercel.app/]
+[Watch Live App](https://ai-chat-bot-app-seven.vercel.app/)
 
 ## Features
 
