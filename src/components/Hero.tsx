@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import CosmaXLogo from "../components/CosmaXLogo";
 
+
 type HeroProps = {
   /** The input/textarea id that should trigger compact mode (default: "chat-input") */
   watchInputId?: string;

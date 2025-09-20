@@ -8,6 +8,7 @@ import ParticlesBackground from "../components/ParticlesBackground";
 import CosmaXLogo from "../components/CosmaXLogo";
 import type { ChatMessage as ChatMessageType } from "../types/chat";
 import { askGemini } from "../services/gemini";
+import SocialLinks from "../components/SocialLinks";
 
 const MAX_MESSAGE_LENGTH = 2000;
 const THINKING_MESSAGES = [
@@ -156,6 +157,10 @@ export default function ChatInterface() {
       {/* Particles background layer */}
       <ParticlesBackground />
 
+      
+      {/* Top-right social icons */}
+      <SocialLinks />
+
       {/* Floating CosmaX hero logo (center → top-left) */}
       <motion.div
         className="fixed z-20 pointer-events-none"
@@ -202,9 +207,9 @@ export default function ChatInterface() {
                   className="pointer-events-auto text-2xl text-balance leading-[1.1]
              sm:text-3xl md:text-3xl lg:text-4xl
              opsize-normal md:opsize-sm
-             text-center -mt-5 md:-mt-6 max-w-[20em] text-white"
+             text-center -mt-5 md:-mt-6 max-w-[20em] text-zinc-300  "
                 >
-                  Have something on your mind? Ask away
+                  On your call.
                 </div>
               </div>
             )}
