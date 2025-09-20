@@ -7,13 +7,17 @@
 
     <!-- Particles host styles (kept here to avoid FOUC) -->
     <style>
-      html, body { height: 100%; margin: 0; }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
       /* host that sits behind your React app */
       #particles-js {
         position: fixed;
         inset: 0;
         z-index: -1;           /* behind everything */
-        background: #0E1113;   /* JSR dark background */
+        background: #0e1113;   /* JSR dark background */
         pointer-events: none;  /* clicks go to your UI */
       }
       /* the injected canvas from particles.js */
@@ -25,7 +29,11 @@
         opacity: 0;
         animation: p-fade 600ms ease forwards;
       }
-      @keyframes p-fade { to { opacity: 1; } }
+      @keyframes p-fade {
+        to {
+          opacity: 1;
+        }
+      }
     </style>
   </head>
   <body>
@@ -35,42 +43,7 @@
     <!-- Your React app -->
     <div id="root"></div>
 
-    <!-- Load particles library first -->
-    <script src="/particles.js"></script>
-
-    <!-- Initialize particles exactly once -->
-    <script>
-      (function () {
-        if (!window.particlesJS) return;
-
-        var config = {
-          particles: {
-            number: { value: 56, density: { enable: true, value_area: 2084 } },
-            color: {
-              value: ["#22d3ee","#ffd100","#0e7490","#a5f3fc","#083344","#cffafe","#cbd5e1"],
-            },
-            shape: { type: "polygon", polygon: { nb_sides: 4 } },
-            opacity: { value: 1, random: false },
-            size: { value: 14, random: true },
-            line_linked: { enable: true, distance: 160, color: "#22d3ee", opacity: 1, width: 1 },
-            move: { enable: true, speed: 0.45, direction: "top", out_mode: "out" }
-          },
-          interactivity: {
-            detect_on: "window",                             // mouse hover works through your UI
-            events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true },
-            modes: { grab: { distance: 140, line_linked: { opacity: 1 } } }
-          },
-          retina_detect: true
-        };
-
-        // clear any previous canvas (HMR)
-        Array.from(document.getElementsByClassName("particles-js-canvas-el")).forEach(el => el.remove());
-
-        window.particlesJS("particles-js", config);
-      })();
-    </script>
-
-
+    <!-- React entry -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
