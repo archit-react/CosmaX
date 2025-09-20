@@ -1,6 +1,6 @@
+// src/components/Composer.tsx
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import { SendHorizonal, Loader2 } from "lucide-react";
 
 type ComposerProps = {
   input: string;
@@ -27,18 +27,18 @@ export default function Composer({
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit();
-      }}
-      className="fixed left-0 right-0 bottom-0 z-10 bg-[#0d1114]/70 backdrop-blur-sm border-t border-zinc-800 p-4"
-    >
-      <div className="mx-auto max-w-2xl flex gap-2 items-center">
+    <div className="fixed inset-x-0 bottom-6 z-30 pointer-events-none">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit();
+        }}
+        className="mx-auto max-w-2xl flex items-center gap-4 pointer-events-auto"
+      >
         {/* Input */}
         <div className="relative flex-1">
           <input
-            id="chat-input" // <-- important for focus/hero logic
+            id="chat-input"
             ref={inputRef}
             type="text"
             value={input}
@@ -61,29 +61,35 @@ export default function Composer({
           )}
         </div>
 
-        {/* JSR-like yellow button */}
+        {/* Old-school keyboard key button with press (shrink) animation */}
+        {/* Old-school keyboard key button with press (shrink) animation */}
         <motion.button
           type="submit"
           disabled={!input.trim() || isLoading || input.length > maxLength}
-          whileTap={{ scale: 0.97 }}
-          whileHover={{ scale: 1.03 }}
-          className="inline-flex items-center gap-2
-                     rounded-lg px-4 py-3
-                     bg-amber-400 text-zinc-900 font-medium
-                     shadow-[0_8px_30px_-10px_rgba(255,200,0,.55)]
-                     ring-1 ring-amber-300/60
-                     hover:bg-amber-300 hover:ring-amber-200
-                     disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          aria-label="Send message"
+          initial={false}
+          whileTap={{
+            scale: 0.95, // shrink while pressed
+            y: 2, // sink a bit
+            boxShadow:
+              "inset 0 2px 4px rgba(0,0,0,0.45), inset 0 -2px 2px rgba(255,255,255,0.85)",
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 450,
+            damping: 30,
+            mass: 0.5,
+          }}
+          className="inline-flex items-center justify-center select-none
+             rounded-md px-6 py-3 font-bold uppercase tracking-wide
+             bg-amber-400 text-zinc-900
+             shadow-[0_4px_0_0_rgba(255,255,255,0.9),0_6px_0_0_rgba(0,0,0,0.25)]
+             border border-amber-300
+             hover:brightness-105 active:brightness-100"
+          aria-label="Proceed"
         >
-          {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <SendHorizonal className="h-4 w-4" />
-          )}
-          <span className="hidden sm:inline">Send</span>
+          Proceed
         </motion.button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }
