@@ -1,5 +1,5 @@
 // src/components/Composer.tsx
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 
 type ComposerProps = {
@@ -7,6 +7,8 @@ type ComposerProps = {
   setInput: (value: string) => void;
   onSubmit: () => void;
   isLoading: boolean;
+  /** Control whether the input should focus on first mount (default: false) */
+  autoFocusOnMount?: boolean;
 };
 
 export default function Composer({
@@ -14,8 +16,24 @@ export default function Composer({
   setInput,
   onSubmit,
   isLoading,
+  autoFocusOnMount = false,
 }: ComposerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Ensure the input is NOT focused on first paint unless explicitly requested.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+
+    if (autoFocusOnMount) {
+      el.focus();
+    } else {
+      // In case the browser restores focus automatically, force a blur after mount.
+      // Timeout lets the first paint complete before blurring.
+      const t = setTimeout(() => el.blur(), 0);
+      return () => clearTimeout(t);
+    }
+  }, [autoFocusOnMount]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -33,7 +51,6 @@ export default function Composer({
         }}
         className="mx-auto max-w-2xl flex items-center gap-4 pointer-events-auto"
       >
-        {/* Input (placeholder styled, user text normal case) */}
         <div className="relative flex-1">
           <input
             id="chat-input"
@@ -56,7 +73,6 @@ export default function Composer({
           />
         </div>
 
-        {/* Old-school key button with press (shrink) animation */}
         <motion.button
           type="submit"
           disabled={!input.trim() || isLoading}
