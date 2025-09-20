@@ -5,6 +5,7 @@ import { SendHorizonal, Loader2 } from "lucide-react";
 import ChatMessage from "../components/ChatMessage";
 import ScrollToBottom from "../components/ScrollToBottom";
 import ParticlesBackground from "../components/ParticlesBackground";
+import CosmaXLogo from "../components/CosmaXLogo";
 import type { ChatMessage as ChatMessageType } from "../types/chat";
 import { askGemini } from "../services/gemini";
 
@@ -23,10 +24,14 @@ export default function ChatInterface() {
   const [showScroll, setShowScroll] = useState(false);
   const [thinkingMessage, setThinkingMessage] = useState(THINKING_MESSAGES[0]);
 
+  // hero/branding compaction (center -> top-left)
+  const [compactHero, setCompactHero] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // Rotate "thinking..." text
   useEffect(() => {
     if (!isLoading) return;
     const interval = setInterval(() => {
@@ -37,10 +42,12 @@ export default function ChatInterface() {
     return () => clearInterval(interval);
   }, [isLoading]);
 
+  // focus the input on mount
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
+  // show/hide "scroll to bottom" button
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -53,9 +60,37 @@ export default function ChatInterface() {
     return () => container.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // auto-scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // hero compaction rules:
+  // - compact when input is focused OR has text OR once any message exists
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const focused = document.activeElement === el;
+      const hasTyped = !!el.value.trim();
+      const hasHistory = messages.length > 0;
+      setCompactHero(focused || hasTyped || hasHistory);
+    };
+
+    el.addEventListener("focus", update);
+    el.addEventListener("blur", update);
+    el.addEventListener("input", update);
+
+    // initialize
+    update();
+
+    return () => {
+      el.removeEventListener("focus", update);
+      el.removeEventListener("blur", update);
+      el.removeEventListener("input", update);
+    };
+  }, [messages.length]);
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -118,8 +153,35 @@ export default function ChatInterface() {
       id="particles-container"
       className="relative flex flex-col min-h-screen text-zinc-100"
     >
-      {/* Particles background (exact JSR black is set inside the component) */}
+      {/* Particles background layer */}
       <ParticlesBackground />
+
+      {/* Floating CosmaX hero logo (center → top-left) */}
+      <motion.div
+        className="fixed z-20 pointer-events-none"
+        animate={
+          compactHero
+            ? {
+                top: "1rem",
+                left: "1rem",
+                x: 0,
+                y: 0,
+                scale: 0.6,
+                opacity: 0.9,
+              }
+            : {
+                top: "50%",
+                left: "50%",
+                x: "-50%",
+                y: "-50%",
+                scale: 1,
+                opacity: 1,
+              }
+        }
+        transition={{ type: "spring", stiffness: 120, damping: 18 }}
+      >
+        <CosmaXLogo className="h-24 w-auto [--bg:transparent]" />
+      </motion.div>
 
       {/* Chat layer */}
       <main className="relative z-10 flex flex-col flex-1 overflow-hidden">
@@ -130,14 +192,25 @@ export default function ChatInterface() {
                      scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent"
         >
           <div className="mx-auto max-w-2xl space-y-4">
-            {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-[40vh] text-zinc-400">
-                <h2 className="text-xl font-medium mb-2">
+            {/* Tagline BELOW the centered logo (only before typing/history) */}
+            {!compactHero && (
+              <div
+                className="fixed left-1/2 z-10 pointer-events-none text-center"
+                style={{
+                  top: "calc(50% + 5.5rem)",
+                  transform: "translateX(-50%)",
+                }}
+              >
+                <h2 className="text-3xl md:text-4xl font-semibold text-zinc-100 drop-shadow-[0_0_1.5rem_rgba(255,255,255,.25)]">
                   Start a conversation
                 </h2>
-                <p className="text-sm">Ask anything you’d like to know</p>
+                <p className="text-sm mt-2 text-zinc-300">
+                  Ask anything you’d like to know
+                </p>
               </div>
-            ) : (
+            )}
+
+            {messages.length > 0 &&
               messages.map((message) => (
                 <ChatMessage
                   key={message.id}
@@ -145,8 +218,7 @@ export default function ChatInterface() {
                   content={message.content}
                   timestamp={message.timestamp}
                 />
-              ))
-            )}
+              ))}
 
             {isLoading && (
               <div className="flex items-start space-x-2">
@@ -168,12 +240,12 @@ export default function ChatInterface() {
         {/* Composer */}
         <form
           onSubmit={handleSubmit}
-          className="fixed left-0 right-0 bottom-0 z-10
-             bg-[#0d1114]/70 backdrop-blur-sm border-t border-zinc-800 p-4"
+          className="fixed left-0 right-0 bottom-0 z-10 bg-[#0d1114]/70 backdrop-blur-sm border-t border-zinc-800 p-4"
         >
           <div className="mx-auto max-w-2xl flex gap-2 items-center">
             <div className="relative flex-1">
               <input
+                id="chat-input" /* <-- used to detect focus */
                 ref={inputRef}
                 type="text"
                 value={input}

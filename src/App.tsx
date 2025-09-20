@@ -1,5 +1,4 @@
 import ParticlesBackground from "./components/ParticlesBackground";
-import Header from "./components/Header";
 import Home from "./pages/Home";
 
 export default function App() {
@@ -7,9 +6,6 @@ export default function App() {
     <>
       {/* background layer */}
       <ParticlesBackground />
-
-      {/* top header with CosmaX logo */}
-      <Header />
 
       {/* page content */}
       <Home />
