@@ -1,7 +1,7 @@
 // src/pages/Home.tsx
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { SendHorizonal, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import ChatMessage from "../components/ChatMessage";
 import ScrollToBottom from "../components/ScrollToBottom";
 import ParticlesBackground from "../components/ParticlesBackground";
@@ -9,6 +9,7 @@ import CosmaXLogo from "../components/CosmaXLogo";
 import type { ChatMessage as ChatMessageType } from "../types/chat";
 import { askGemini } from "../services/gemini";
 import SocialLinks from "../components/SocialLinks";
+import Composer from "../components/Composer";
 
 const MAX_MESSAGE_LENGTH = 2000;
 const THINKING_MESSAGES = [
@@ -29,7 +30,6 @@ export default function ChatInterface() {
   const [compactHero, setCompactHero] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Rotate "thinking..." text
@@ -43,9 +43,10 @@ export default function ChatInterface() {
     return () => clearInterval(interval);
   }, [isLoading]);
 
-  // focus the input on mount
+  // focus the input on mount (input lives inside Composer; target by ID)
   useEffect(() => {
-    inputRef.current?.focus();
+    const el = document.getElementById("chat-input") as HTMLInputElement | null;
+    el?.focus();
   }, []);
 
   // show/hide "scroll to bottom" button
@@ -69,7 +70,7 @@ export default function ChatInterface() {
   // hero compaction rules:
   // - compact when input is focused OR has text OR once any message exists
   useEffect(() => {
-    const el = inputRef.current;
+    const el = document.getElementById("chat-input") as HTMLInputElement | null;
     if (!el) return;
 
     const update = () => {
@@ -82,9 +83,7 @@ export default function ChatInterface() {
     el.addEventListener("focus", update);
     el.addEventListener("blur", update);
     el.addEventListener("input", update);
-
-    // initialize
-    update();
+    update(); // initialize
 
     return () => {
       el.removeEventListener("focus", update);
@@ -139,16 +138,6 @@ export default function ChatInterface() {
     [input, isLoading]
   );
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSubmit();
-      }
-    },
-    [handleSubmit]
-  );
-
   return (
     <div
       id="particles-container"
@@ -157,7 +146,6 @@ export default function ChatInterface() {
       {/* Particles background layer */}
       <ParticlesBackground />
 
-      
       {/* Top-right social icons */}
       <SocialLinks />
 
@@ -201,13 +189,13 @@ export default function ChatInterface() {
             {!compactHero && (
               <div
                 className="fixed left-1/2 -translate-x-1/2 z-20 pointer-events-none"
-                style={{ top: "calc(33% + 6.5rem)" }} // logo height (~6rem) + a bit of gap
+                style={{ top: "calc(33% + 6.5rem)" }}
               >
                 <div
                   className="pointer-events-auto text-2xl text-balance leading-[1.1]
-             sm:text-3xl md:text-3xl lg:text-4xl
-             opsize-normal md:opsize-sm
-             text-center -mt-5 md:-mt-6 max-w-[20em] text-zinc-300  "
+                             sm:text-3xl md:text-3xl lg:text-4xl
+                             opsize-normal md:opsize-sm
+                             text-center -mt-5 md:-mt-6 max-w-[20em] text-zinc-300"
                 >
                   On your call.
                 </div>
@@ -242,53 +230,13 @@ export default function ChatInterface() {
         <ScrollToBottom show={showScroll} onClick={scrollToBottom} />
 
         {/* Composer */}
-        <form
+        <Composer
+          input={input}
+          setInput={setInput}
           onSubmit={handleSubmit}
-          className="fixed left-0 right-0 bottom-0 z-10 bg-[#0d1114]/70 backdrop-blur-sm border-t border-zinc-800 p-4"
-        >
-          <div className="mx-auto max-w-2xl flex gap-2 items-center">
-            <div className="relative flex-1">
-              <input
-                id="chat-input" /* <-- used to detect focus */
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isLoading}
-                maxLength={MAX_MESSAGE_LENGTH}
-                placeholder="Type your message..."
-                aria-label="Chat input"
-                className="w-full p-3 pr-12 rounded-lg bg-[#0d1114]/80
-                           text-zinc-100 outline-none focus:ring-2 focus:ring-cyan-400
-                           disabled:opacity-50"
-              />
-              {input.length > 0 && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400">
-                  {input.length}/{MAX_MESSAGE_LENGTH}
-                </span>
-              )}
-            </div>
-
-            <motion.button
-              type="submit"
-              disabled={
-                !input.trim() || isLoading || input.length > MAX_MESSAGE_LENGTH
-              }
-              whileTap={{ scale: 0.95 }}
-              whileHover={{ scale: 1.05 }}
-              className="p-3 rounded-full bg-green-500 hover:bg-green-600 text-white
-                         disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              aria-label="Send message"
-            >
-              {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <SendHorizonal className="w-4 h-4" />
-              )}
-            </motion.button>
-          </div>
-        </form>
+          isLoading={isLoading}
+          maxLength={MAX_MESSAGE_LENGTH}
+        />
       </main>
     </div>
   );
