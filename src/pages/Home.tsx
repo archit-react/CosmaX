@@ -170,7 +170,7 @@ export default function ChatInterface() {
                 opacity: 0.9,
               }
             : {
-                top: "50%",
+                top: "33%",
                 left: "50%",
                 x: "-50%",
                 y: "-50%",
@@ -192,21 +192,20 @@ export default function ChatInterface() {
                      scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent"
         >
           <div className="mx-auto max-w-2xl space-y-4">
-            {/* Tagline BELOW the centered logo (only before typing/history) */}
+            {/* Tagline placed directly UNDER the centered logo */}
             {!compactHero && (
               <div
-                className="fixed left-1/2 z-10 pointer-events-none text-center"
-                style={{
-                  top: "calc(50% + 5.5rem)",
-                  transform: "translateX(-50%)",
-                }}
+                className="fixed left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+                style={{ top: "calc(33% + 6.5rem)" }} // logo height (~6rem) + a bit of gap
               >
-                <h2 className="text-3xl md:text-4xl font-semibold text-zinc-100 drop-shadow-[0_0_1.5rem_rgba(255,255,255,.25)]">
-                  Start a conversation
-                </h2>
-                <p className="text-sm mt-2 text-zinc-300">
-                  Ask anything you’d like to know
-                </p>
+                <div
+                  className="pointer-events-auto text-2xl text-balance leading-[1.1]
+             sm:text-3xl md:text-3xl lg:text-4xl
+             opsize-normal md:opsize-sm
+             text-center -mt-5 md:-mt-6 max-w-[20em] text-white"
+                >
+                  Have something on your mind? Ask away
+                </div>
               </div>
             )}
 
