@@ -1,24 +1,28 @@
-/* Tailwind layers must come first */
+/* --- Tailwind layers must come first --- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ---- Global page sizing ---- */
-html, body, #root {
+/* --- App should fill the viewport --- */
+html,
+body,
+#root {
   height: 100%;
+  background-color: #0d1114; /* solid JSR dark */
   margin: 0;
   padding: 0;
 }
 
-/* ---- Theme & base colors (JSR-like) ---- */
+/* --- JSR-like dark theme --- */
 :root {
   color-scheme: dark;
-  --bg-jsr-950: #0d1114;    /* close to JSR dark */
-  --text-primary: #e5e7eb;  /* zinc-200-ish */
+  --bg-jsr-950: #0d1114; /* background */
+  --text-primary: #e5e7eb; /* readable light text */
 }
 
-html, body {
-  background-color: var(--bg-jsr-950); /* show through particles */
+html,
+body {
+  background-color: var(--bg-jsr-950);
   color: var(--text-primary);
   line-height: 1.5;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -26,10 +30,10 @@ html, body {
   scroll-behavior: smooth;
 }
 
-/* ---- Particles canvas placement ---- */
+/* --- Particles placement & behavior --- */
 #particles-js,
 .particles-js-canvas-el {
-  background: transparent !important; /* particles don’t paint a bg */
+  background: transparent !important; /* let the body bg show through */
 }
 
 #particles-js {
@@ -37,7 +41,7 @@ html, body {
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: -10; /* sit behind your UI */
+  z-index: -10; /* behind your UI */
 }
 
 .particles-js-canvas-el {
@@ -45,16 +49,18 @@ html, body {
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
-  pointer-events: none;
+  opacity: 0; /* fade-in for nicer load */
+  pointer-events: none; /* don't block clicks */
   animation: fade-in-opacity 0.8s ease forwards;
 }
 
 @keyframes fade-in-opacity {
-  to { opacity: 1; }
+  to {
+    opacity: 1;
+  }
 }
 
-/* ---- Nice selection color ---- */
+/* --- Nice text selection --- */
 ::selection {
   background: rgba(34, 211, 238, 0.35);
   color: #0f172a;

@@ -14,13 +14,6 @@ declare global {
   }
 }
 
-/** VISUAL TUNING
- * - More connections: increase `line_linked.distance`
- * - Slightly more particles
- * - JSR-ish teal link color & subtle opacity
- * - Free-floating motion (not only “top”)
- * - Background: deep slate + gentle top-to-bottom vignette
- */
 const config = {
   particles: {
     number: { value: 84, density: { enable: true, value_area: 2000 } },
@@ -35,20 +28,20 @@ const config = {
         "#cbd5e1", // slate-200
       ],
     },
-    shape: { type: "polygon", polygon: { nb_sides: 4 } }, // squares
-    opacity: { value: 1, random: false },
+    shape: { type: "polygon", polygon: { nb_sides: 4 } },
+    opacity: { value: 1 },
     size: { value: 12, random: true },
     line_linked: {
       enable: true,
-      distance: 220,             // <-- more reach => more edges
+      distance: 220,
       color: "#22d3ee",
-      opacity: 0.35,             // <-- softer lines
+      opacity: 0.35,
       width: 1,
     },
     move: {
       enable: true,
       speed: 0.55,
-      direction: "none",         // <-- float around, not only upwards
+      direction: "none",
       random: false,
       straight: false,
       out_mode: "out",
@@ -86,29 +79,13 @@ export default function ParticlesBackground() {
     const initParticles = () => {
       if (!window.particlesJS) {
         console.warn(
-          "[Particles] window.particlesJS not found. " +
-            "Make sure /public/particles.js exists (visit /particles.js)."
+          "[Particles] window.particlesJS not found. Check /public/particles.js"
         );
         return;
       }
-
-      // Ensure global the library expects is an array (prevents 'push' of null)
       if (!Array.isArray(window.pJSDom)) window.pJSDom = [];
 
-      // Make sure the container exists and has size
-      const host = document.getElementById("particles-js");
-      if (!host) {
-        console.warn("[Particles] #particles-js container not found.");
-        return;
-      }
-      if (!host.style.height) host.style.height = "100%";
-
-      // Apply JSR-like background here so the canvas blends perfectly
-      host.style.background =
-        "linear-gradient(to bottom, rgba(9,12,16,0.0) 0%, rgba(9,12,16,0.35) 55%, rgba(9,12,16,0.6) 100%), #0b1117";
-
       removeCanvases();
-
       window.particlesJS.load("particles-js", config, () => {
         const canvas = document.querySelector<HTMLCanvasElement>(
           ".particles-js-canvas-el"
@@ -118,9 +95,6 @@ export default function ParticlesBackground() {
           canvas.style.pointerEvents = "none";
           canvas.setAttribute("aria-hidden", "true");
           canvas.style.zIndex = "0";
-          host.style.zIndex = "0";
-          host.style.position = "absolute";
-          host.style.inset = "0";
         }
       });
     };
@@ -138,9 +112,7 @@ export default function ParticlesBackground() {
     script.async = true;
     script.onload = initParticles;
     script.onerror = () =>
-      console.error(
-        `[Particles] Failed to load ${SCRIPT_SRC}. Place particles.js in /public.`
-      );
+      console.error(`[Particles] Failed to load ${SCRIPT_SRC}`);
     document.body.appendChild(script);
 
     return () => {

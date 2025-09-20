@@ -150,10 +150,10 @@ export default function ChatInterface() {
 
             {isLoading && (
               <div className="flex items-start space-x-2">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#0d1114] flex items-center justify-center">
                   <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
                 </div>
-                <div className="bg-zinc-800/80 px-4 py-2 rounded-xl text-sm">
+                <div className="bg-[#0d1114]/90 px-4 py-2 rounded-xl text-sm">
                   {thinkingMessage}
                 </div>
               </div>
@@ -169,7 +169,7 @@ export default function ChatInterface() {
         <form
           onSubmit={handleSubmit}
           className="fixed left-0 right-0 bottom-0 z-10
-                     bg-[#0d0d0d]/70 backdrop-blur-sm border-t border-zinc-800 p-4"
+             bg-[#0d1114]/70 backdrop-blur-sm border-t border-zinc-800 p-4"
         >
           <div className="mx-auto max-w-2xl flex gap-2 items-center">
             <div className="relative flex-1">
@@ -183,7 +183,7 @@ export default function ChatInterface() {
                 maxLength={MAX_MESSAGE_LENGTH}
                 placeholder="Type your message..."
                 aria-label="Chat input"
-                className="w-full p-3 pr-12 rounded-lg bg-zinc-800/80
+                className="w-full p-3 pr-12 rounded-lg bg-[#0d1114]/80
                            text-zinc-100 outline-none focus:ring-2 focus:ring-cyan-400
                            disabled:opacity-50"
               />
