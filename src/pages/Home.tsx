@@ -154,8 +154,8 @@ export default function ChatInterface() {
           compactHero
             ? {
                 top: "1rem",
-                left: "1rem",
-                x: 0,
+                left: "0rem",
+                x: -50,
                 y: 0,
                 scale: 0.6,
                 opacity: 0.9,
