@@ -1,48 +1,54 @@
 import { useEffect } from "react";
 
+type PJSVendors = { destroypJS?: () => void };
+type PJSFn = { vendors?: PJSVendors };
+type PJSInstance = { fn?: PJSFn };
+type PJSDomEntry = { pJS?: PJSInstance };
+
 declare global {
   interface Window {
     particlesJS?: {
       load: (id: string, config: object, cb?: () => void) => void;
     };
-    pJSDom?: Array<{
-      pJS?: { fn?: { vendors?: { destroypJS?: () => void } } };
-    }>;
+    pJSDom?: PJSDomEntry[] | null;
   }
 }
 
+/** VISUAL TUNING
+ * - More connections: increase `line_linked.distance`
+ * - Slightly more particles
+ * - JSR-ish teal link color & subtle opacity
+ * - Free-floating motion (not only “top”)
+ * - Background: deep slate + gentle top-to-bottom vignette
+ */
 const config = {
   particles: {
-    number: { value: 56, density: { enable: true, value_area: 2084 } },
+    number: { value: 84, density: { enable: true, value_area: 2000 } },
     color: {
       value: [
-        "#22d3ee",
-        "#ffd100",
-        "#0e7490",
-        "#a5f3fc",
-        "#083344",
-        "#cffafe",
-        "#cbd5e1",
+        "#22d3ee", // cyan
+        "#ffd100", // yellow accent
+        "#0e7490", // teal dark
+        "#a5f3fc", // light cyan
+        "#083344", // deep slate-blue
+        "#cffafe", // very light cyan
+        "#cbd5e1", // slate-200
       ],
     },
-    shape: {
-      type: "polygon",
-      stroke: { width: 0, color: "#22d3ee" },
-      polygon: { nb_sides: 4 },
-    },
+    shape: { type: "polygon", polygon: { nb_sides: 4 } }, // squares
     opacity: { value: 1, random: false },
-    size: { value: 14, random: true },
+    size: { value: 12, random: true },
     line_linked: {
       enable: true,
-      distance: 160,
+      distance: 220,             // <-- more reach => more edges
       color: "#22d3ee",
-      opacity: 1,
+      opacity: 0.35,             // <-- softer lines
       width: 1,
     },
     move: {
       enable: true,
-      speed: 0.45,
-      direction: "top",
+      speed: 0.55,
+      direction: "none",         // <-- float around, not only upwards
       random: false,
       straight: false,
       out_mode: "out",
@@ -50,7 +56,6 @@ const config = {
     },
   },
   interactivity: {
-    // KEY CHANGE: listen on the window so hover/click works under your UI
     detect_on: "window",
     events: {
       onhover: { enable: true, mode: "grab" },
@@ -58,7 +63,7 @@ const config = {
       resize: true,
     },
     modes: {
-      grab: { distance: 140, line_linked: { opacity: 1 } },
+      grab: { distance: 160, line_linked: { opacity: 0.9 } },
       bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
       repulse: { distance: 200, duration: 0.4 },
       push: { particles_nb: 1 },
@@ -70,68 +75,85 @@ const config = {
 
 export default function ParticlesBackground() {
   useEffect(() => {
-    // ensure the script exists in /public (Vite) as /particles.js
     const SCRIPT_SRC = "/particles.js";
 
-    // Destroy any previous instance (Vite HMR / route changes)
-    const destroyExisting = () => {
-      if (window.pJSDom && window.pJSDom.length) {
-        window.pJSDom.forEach((d) => d?.pJS?.fn?.vendors?.destroypJS?.());
-        window.pJSDom.length = 0;
-      }
-      const canvases = document.querySelectorAll(".particles-js-canvas-el");
-      canvases.forEach((c) => c.parentElement?.removeChild(c));
+    const removeCanvases = () => {
+      document
+        .querySelectorAll<HTMLCanvasElement>(".particles-js-canvas-el")
+        .forEach((c) => c.parentElement?.removeChild(c));
     };
 
     const initParticles = () => {
-      if (!window.particlesJS) return;
-      destroyExisting();
+      if (!window.particlesJS) {
+        console.warn(
+          "[Particles] window.particlesJS not found. " +
+            "Make sure /public/particles.js exists (visit /particles.js)."
+        );
+        return;
+      }
+
+      // Ensure global the library expects is an array (prevents 'push' of null)
+      if (!Array.isArray(window.pJSDom)) window.pJSDom = [];
+
+      // Make sure the container exists and has size
+      const host = document.getElementById("particles-js");
+      if (!host) {
+        console.warn("[Particles] #particles-js container not found.");
+        return;
+      }
+      if (!host.style.height) host.style.height = "100%";
+
+      // Apply JSR-like background here so the canvas blends perfectly
+      host.style.background =
+        "linear-gradient(to bottom, rgba(9,12,16,0.0) 0%, rgba(9,12,16,0.35) 55%, rgba(9,12,16,0.6) 100%), #0b1117";
+
+      removeCanvases();
+
       window.particlesJS.load("particles-js", config, () => {
-        const canvas = document.querySelector(
+        const canvas = document.querySelector<HTMLCanvasElement>(
           ".particles-js-canvas-el"
-        ) as HTMLCanvasElement | null;
+        );
         if (canvas) {
-          canvas.style.opacity = "1"; // fade-in
-          canvas.style.pointerEvents = "none"; // click-through
+          canvas.style.opacity = "1";
+          canvas.style.pointerEvents = "none";
           canvas.setAttribute("aria-hidden", "true");
+          canvas.style.zIndex = "0";
+          host.style.zIndex = "0";
+          host.style.position = "absolute";
+          host.style.inset = "0";
         }
       });
     };
 
-    // If script already present, init immediately
     const existing = document.querySelector<HTMLScriptElement>(
       `script[src="${SCRIPT_SRC}"]`
     );
     if (existing) {
       initParticles();
-      return destroyExisting; // cleanup on unmount
+      return () => removeCanvases();
     }
 
-    // Otherwise, load it
     const script = document.createElement("script");
     script.src = SCRIPT_SRC;
     script.async = true;
     script.onload = initParticles;
+    script.onerror = () =>
+      console.error(
+        `[Particles] Failed to load ${SCRIPT_SRC}. Place particles.js in /public.`
+      );
     document.body.appendChild(script);
 
-    // Cleanup on unmount
     return () => {
       script.onload = null;
-      // (don’t remove the script tag to avoid reloading on every mount)
-      destroyExisting();
+      removeCanvases();
     };
   }, []);
 
-  // Full-bleed, behind everything; parent container should be relative
   return (
     <div
       id="particles-js"
-      className="absolute inset-0 -z-10"
-      style={{
-        height: "100%",
-        width: "100%",
-        backgroundColor: "#0d0d0d", // exact JSR bg
-      }}
+      className="absolute inset-0 z-0"
+      style={{ width: "100%", height: "100%" }}
     />
   );
 }
