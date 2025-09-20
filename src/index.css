@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Make the canvas/background fill the screen */
+html, body, #root {
+  height: 100%;
+}
+
+/* Fade-in & positioning for the particles canvas */
+.particles-js-canvas-el {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  animation: fade-in-opacity 1s linear forwards;
+  transition: opacity 1s linear;
+}
+
+@keyframes fade-in-opacity {
+  to { opacity: 1; }
+}
