@@ -23,21 +23,21 @@ export default function ChatMessage({
   const bubbleClass = isUser
     ? [
         "ml-auto",
-        "bg-amber-400/20",
-        "border border-amber-300/40",
+        "bg-white/5",
+        "border border-white/10",
         "text-amber-200",
-        "shadow-[0_0_24px_-8px_rgba(251,191,36,0.45)]",
-        "backdrop-blur-[1px]",
+        "backdrop-blur-md",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_16px_-6px_rgba(0,0,0,0.45)]",
       ].join(" ")
     : isSystem
     ? "mx-auto bg-purple-600 text-white text-center"
     : [
         "mr-auto",
-        "bg-cyan-400/15",
-        "border border-cyan-400/40",
-        "text-cyan-100",
-        "shadow-[0_0_24px_-10px_rgba(34,211,238,0.45)]",
-        "backdrop-blur-[1px]",
+        "bg-white/5",
+        "border border-white/10",
+        "text-cyan-100", // keep cyan text for bot role
+        "backdrop-blur-md",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_16px_-6px_rgba(0,0,0,0.45)]",
       ].join(" ");
 
   return (
