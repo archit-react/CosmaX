@@ -1,25 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="CX Logo">
-  <style>
-    .cx {
-      font-family: "Audiowide", sans-serif;
-      font-weight: bold;
-      paint-order: stroke fill;
-      stroke: white;
-      stroke-width: 4px;
-      letter-spacing: -20px; /* tighter spacing for brand look */
-    }
-  </style>
-
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="1024" height="1024">
   <defs>
-    <linearGradient id="cxGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#22d3ee"/>   <!-- Cyan -->
-      <stop offset="100%" stop-color="#facc15"/> <!-- Yellow -->
+    <!-- ChatGPT-like emerald/teal gradient -->
+    <linearGradient id="chatgptGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10A37F"/> <!-- Emerald green -->
+      <stop offset="50%" stop-color="#0E7C66"/> <!-- Deep teal -->
+      <stop offset="100%" stop-color="#14B89A"/> <!-- Bright mint -->
     </linearGradient>
   </defs>
 
-  <!-- Centered CX -->
-  <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle"
-        font-size="200" class="cx" fill="url(#cxGradient)">
-    CX
-  </text>
+  <!-- Neural nodes -->
+  <circle cx="100" cy="60" r="18" fill="url(#chatgptGradient)" stroke="white" stroke-width="12"/>
+  <circle cx="60" cy="140" r="18" fill="url(#chatgptGradient)" stroke="white" stroke-width="12"/>
+  <circle cx="140" cy="140" r="18" fill="url(#chatgptGradient)" stroke="white" stroke-width="12"/>
+
+  <!-- Connecting wires -->
+  <line x1="100" y1="60" x2="60" y2="140" stroke="url(#chatgptGradient)" stroke-width="18"/>
+  <line x1="100" y1="60" x2="140" y2="140" stroke="url(#chatgptGradient)" stroke-width="18"/>
+  <line x1="60" y1="140" x2="140" y2="140" stroke="url(#chatgptGradient)" stroke-width="18"/>
 </svg>
