@@ -87,10 +87,7 @@ export default function Composer({
             onKeyDown={handleKeyDown}
             disabled={isLoading}
             autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
             spellCheck={false}
-            enterKeyHint="send"
             placeholder="Type your message"
             aria-label="Chat input"
             className="w-full p-3 rounded-lg
