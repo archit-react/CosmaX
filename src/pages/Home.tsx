@@ -24,8 +24,6 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [showScroll, setShowScroll] = useState(false);
   const [thinkingMessage, setThinkingMessage] = useState(THINKING_MESSAGES[0]);
-
-  // hero/branding compaction (center -> top-left)
   const [compactHero, setCompactHero] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -60,8 +58,7 @@ export default function ChatInterface() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // hero compaction rules:
-  // - compact when input is focused OR has text OR once any message exists
+  // compact hero when input is active or chat has history
   useEffect(() => {
     const el = document.getElementById("chat-input") as HTMLInputElement | null;
     if (!el) return;
@@ -76,7 +73,7 @@ export default function ChatInterface() {
     el.addEventListener("focus", update);
     el.addEventListener("blur", update);
     el.addEventListener("input", update);
-    update(); // initialize
+    update();
 
     return () => {
       el.removeEventListener("focus", update);
@@ -135,13 +132,10 @@ export default function ChatInterface() {
       id="particles-container"
       className="relative flex flex-col min-h-screen text-zinc-100"
     >
-      {/* Particles background layer */}
       <ParticlesBackground />
-
-      {/* Top-right social icons */}
       <SocialLinks />
 
-      {/* Floating CosmaX hero logo (center → top-left) */}
+      {/* Logo center → top-left */}
       <motion.div
         className="fixed z-20 pointer-events-none"
         initial={{
@@ -156,10 +150,10 @@ export default function ChatInterface() {
           compactHero
             ? {
                 top: "1rem",
-                left: "0rem",
-                x: -50,
+                left: "0.75rem",
+                x: 0,
                 y: 0,
-                scale: 0.6,
+                scale: 0.65,
                 opacity: 0.9,
               }
             : {
@@ -173,30 +167,24 @@ export default function ChatInterface() {
         }
         transition={{ type: "spring", stiffness: 120, damping: 18 }}
       >
-        <CosmaXLogo className="h-24 w-auto [--bg:transparent]" />
+        <CosmaXLogo className="h-20 sm:h-24 w-auto [--bg:transparent]" />
       </motion.div>
 
-      {/* Chat layer */}
+      {/* Chat area */}
       <main className="relative z-10 flex flex-col flex-1 overflow-hidden">
         <div
           ref={containerRef}
           aria-live="polite"
-          className="flex-1 overflow-y-auto px-4 pt-24 pb-28
+          className="flex-1 overflow-y-auto px-3 sm:px-4 pt-20 sm:pt-24 pb-[7rem] sm:pb-28 safe-bottom overscroll-contain scroll-smooth touch-pan-y
                      scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent"
         >
           <div className="mx-auto max-w-2xl space-y-4">
-            {/* Tagline placed directly UNDER the centered logo */}
             {!compactHero && (
               <div
                 className="fixed left-1/2 -translate-x-1/2 z-20 pointer-events-none"
                 style={{ top: "calc(33% + 6.5rem)" }}
               >
-                <div
-                  className="pointer-events-auto text-2xl text-balance leading-[1.1]
-                             sm:text-3xl md:text-3xl lg:text-4xl
-                             opsize-normal md:opsize-sm
-                             text-center -mt-5 md:-mt-6 max-w-[20em] text-zinc-300"
-                >
+                <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-center text-zinc-300">
                   On your call.
                 </div>
               </div>
@@ -214,10 +202,10 @@ export default function ChatInterface() {
 
             {isLoading && (
               <div className="flex items-start space-x-2">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#0d1114] flex items-center justify-center">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0d1114] flex items-center justify-center">
                   <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
                 </div>
-                <div className="bg-[#0d1114]/90 px-4 py-2 rounded-xl text-sm">
+                <div className="bg-[#0d1114]/90 px-3 py-2 rounded-xl text-sm">
                   {thinkingMessage}
                 </div>
               </div>
@@ -229,7 +217,6 @@ export default function ChatInterface() {
 
         <ScrollToBottom show={showScroll} onClick={scrollToBottom} />
 
-        {/* Composer */}
         <Composer
           input={input}
           setInput={setInput}

@@ -7,7 +7,6 @@ type ComposerProps = {
   setInput: (value: string) => void;
   onSubmit: () => void;
   isLoading: boolean;
-  /** Control whether the input should focus on first mount (default: false) */
   autoFocusOnMount?: boolean;
 };
 
@@ -20,7 +19,6 @@ export default function Composer({
 }: ComposerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Ensure the input is NOT focused on first paint unless explicitly requested.
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
@@ -28,8 +26,6 @@ export default function Composer({
     if (autoFocusOnMount) {
       el.focus();
     } else {
-      // In case the browser restores focus automatically, force a blur after mount.
-      // Timeout lets the first paint complete before blurring.
       const t = setTimeout(() => el.blur(), 0);
       return () => clearTimeout(t);
     }
@@ -43,13 +39,13 @@ export default function Composer({
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-6 z-30 pointer-events-none">
+    <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-30 pointer-events-none px-3">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit();
         }}
-        className="mx-auto max-w-2xl flex items-center gap-4 pointer-events-auto"
+        className="mx-auto max-w-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pointer-events-auto"
       >
         <div className="relative flex-1">
           <input
@@ -64,14 +60,15 @@ export default function Composer({
             spellCheck={false}
             placeholder="Type your message"
             aria-label="Chat input"
-            className="w-full p-3 pr-12 rounded-lg
-                      bg-white/5 backdrop-blur-md text-zinc-100 outline-none
-                        border border-white/10
-                        shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]
-                        font-['Audiowide'] placeholder:font-['Audiowide']
-                        focus:ring-2 focus:ring-white/20 focus:border-white/20
-                        placeholder:uppercase placeholder:tracking-wide placeholder:font-bold
-                        disabled:opacity-50"
+            className="w-full p-3 rounded-lg
+                       bg-white/5 backdrop-blur-md text-zinc-100 outline-none
+                       border border-white/10
+                       shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]
+                       font-['Audiowide'] placeholder:font-['Audiowide']
+                       focus:ring-2 focus:ring-white/20 focus:border-white/20
+                       placeholder:uppercase placeholder:tracking-wide placeholder:font-bold
+                       disabled:opacity-50
+                       text-base sm:text-sm"
           />
         </div>
 
@@ -92,12 +89,13 @@ export default function Composer({
             mass: 0.5,
           }}
           className="inline-flex items-center justify-center select-none
-                     -mt-1 rounded-2xl px-6 py-3 font-bold uppercase tracking-wide
-                     bg-amber-400 backdrop-blur-md  text-zinc-900
+                     rounded-2xl px-6 py-3 font-bold uppercase tracking-wide
+                     bg-amber-400 backdrop-blur-md text-zinc-900
                      shadow-[0_4px_0_0_rgba(255,255,255,0.9),0_6px_0_0_rgba(0,0,0,0.25)]
                      border border-amber-300
-                      font-['Audiowide'] placeholder:font-['Audiowide']
-                     hover:brightness-105 active:brightness-100"
+                     font-['Audiowide']
+                     hover:brightness-105 active:brightness-100
+                     text-sm sm:text-base"
           aria-label="Proceed"
         >
           PROCEED

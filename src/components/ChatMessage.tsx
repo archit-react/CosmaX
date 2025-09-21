@@ -1,3 +1,4 @@
+// src/components/ChatMessage.tsx
 import { useTypewriter } from "../hooks/useTypewriter";
 
 type ChatMessageProps = {
@@ -14,11 +15,9 @@ export default function ChatMessage({
   const isUser = role === "user";
   const isSystem = role === "system";
 
-  // Always call the hook
   const typedContent = useTypewriter(content, 20);
   const displayContent = role === "bot" ? typedContent : content;
 
-  // Bubble styles
   const bubbleClass = isUser
     ? [
         "ml-auto",
@@ -41,14 +40,17 @@ export default function ChatMessage({
 
   return (
     <div
-      className={`w-fit max-w-[80%] px-4 py-2 rounded-xl text-sm ${bubbleClass}`}
+      className={`w-fit max-w-[85%] sm:max-w-[75%] px-4 py-2 rounded-xl ${bubbleClass}`}
     >
-      <p className="whitespace-pre-wrap font-['Audiowide'] tracking-wide">
+      <p
+        className="whitespace-pre-wrap break-words font-['Audiowide']
+                   tracking-wide text-sm sm:text-base leading-relaxed"
+      >
         {displayContent}
       </p>
       {timestamp && (
         <div
-          className={`text-xs mt-1 font-['Audiowide'] tracking-widest ${
+          className={`mt-1 text-[0.65rem] sm:text-xs font-['Audiowide'] tracking-widest ${
             isUser ? "text-yellow-200/70" : "text-cyan-200/70"
           }`}
         >
