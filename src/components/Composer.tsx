@@ -18,7 +18,9 @@ export default function Composer({
   autoFocusOnMount = false,
 }: ComposerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
+  // Keep input unfocused on mount unless explicitly requested
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
@@ -31,6 +33,31 @@ export default function Composer({
     }
   }, [autoFocusOnMount]);
 
+  // Measure composer height and expose as CSS var --composer-h
+  useEffect(() => {
+    const node = wrapperRef.current;
+    if (!node) return;
+
+    const setVar = () => {
+      const h = node.offsetHeight;
+      document.documentElement.style.setProperty("--composer-h", `${h}px`);
+    };
+
+    setVar();
+    const ro = new ResizeObserver(setVar);
+    ro.observe(node);
+
+    // Update on orientation changes too
+    window.addEventListener("orientationchange", setVar);
+    window.addEventListener("resize", setVar);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("orientationchange", setVar);
+      window.removeEventListener("resize", setVar);
+    };
+  }, []);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -39,7 +66,10 @@ export default function Composer({
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-30 pointer-events-none px-3">
+    <div
+      ref={wrapperRef}
+      className="fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),1rem)] z-30 pointer-events-none px-3"
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();

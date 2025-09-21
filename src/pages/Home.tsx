@@ -150,8 +150,8 @@ export default function ChatInterface() {
           compactHero
             ? {
                 top: "1rem",
-                left: "0.75rem",
-                x: 0,
+                left: "0rem",
+                x: -45,
                 y: 0,
                 scale: 0.65,
                 opacity: 0.9,
@@ -175,7 +175,9 @@ export default function ChatInterface() {
         <div
           ref={containerRef}
           aria-live="polite"
-          className="flex-1 overflow-y-auto px-3 sm:px-4 pt-20 sm:pt-24 pb-[7rem] sm:pb-28 safe-bottom overscroll-contain scroll-smooth touch-pan-y
+          className="flex-1 overflow-y-auto px-3 sm:px-4 pt-20 sm:pt-24
+                     pb-[calc(var(--composer-h,6.25rem)+env(safe-area-inset-bottom))]
+                     overscroll-contain scroll-smooth touch-pan-y
                      scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent"
         >
           <div className="mx-auto max-w-2xl space-y-4">
