@@ -92,7 +92,7 @@ export default function Composer({
             mass: 0.5,
           }}
           className="inline-flex items-center justify-center select-none
-                     rounded-2xl px-6 py-3 font-bold uppercase tracking-wide
+                     -mt-1 rounded-2xl px-6 py-3 font-bold uppercase tracking-wide
                      bg-amber-400 backdrop-blur-md  text-zinc-900
                      shadow-[0_4px_0_0_rgba(255,255,255,0.9),0_6px_0_0_rgba(0,0,0,0.25)]
                      border border-amber-300
