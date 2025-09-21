@@ -175,10 +175,11 @@ export default function ChatInterface() {
         <div
           ref={containerRef}
           aria-live="polite"
-          className="flex-1 overflow-y-auto px-3 sm:px-4 pt-20 sm:pt-24
-                     pb-[calc(var(--composer-h,6.25rem)+env(safe-area-inset-bottom))]
-                     overscroll-contain scroll-smooth touch-pan-y
-                     scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent relative z-10"
+          className="flex-1 overflow-y-auto px-3 sm:px-4
+             pt-[calc(env(safe-area-inset-top)+clamp(3.5rem,8vh,6rem))]
+             pb-[calc(var(--composer-h,6.25rem)+env(safe-area-inset-bottom))]
+             overscroll-contain scroll-smooth touch-pan-y
+             scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent relative z-10"
         >
           <div className="mx-auto max-w-2xl space-y-4">
             {!compactHero && (
