@@ -66,11 +66,12 @@ export default function Composer({
             aria-label="Chat input"
             className="w-full p-3 pr-12 rounded-lg
                       bg-white/5 backdrop-blur-md text-zinc-100 outline-none
-        border border-white/10
-           shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]
-           focus:ring-2 focus:ring-white/20 focus:border-white/20
-            placeholder:uppercase placeholder:tracking-wide placeholder:font-bold
-            disabled:opacity-50"
+                        border border-white/10
+                        shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]
+                        font-['Audiowide'] placeholder:font-['Audiowide']
+                        focus:ring-2 focus:ring-white/20 focus:border-white/20
+                        placeholder:uppercase placeholder:tracking-wide placeholder:font-bold
+                        disabled:opacity-50"
           />
         </div>
 
@@ -95,6 +96,7 @@ export default function Composer({
                      bg-amber-400 backdrop-blur-md  text-zinc-900
                      shadow-[0_4px_0_0_rgba(255,255,255,0.9),0_6px_0_0_rgba(0,0,0,0.25)]
                      border border-amber-300
+                      font-['Audiowide'] placeholder:font-['Audiowide']
                      hover:brightness-105 active:brightness-100"
           aria-label="Proceed"
         >
