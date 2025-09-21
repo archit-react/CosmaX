@@ -1,66 +1,85 @@
-# AI ChatBot (Gemini + React + TypeScript)
+# CosmaX (AI ChatBot · Gemini + React + TypeScript)
 
-A real-time AI chatbot interface powered by Google Gemini Pro API, built with React, TypeScript, Tailwind CSS, and modern hooks. Designed with a macOS-style UI, typewriter animation, dark/light mode, and model switcher — suitable for production-ready use or portfolio projects.
+A futuristic AI chatbot interface powered by Google Gemini API, built with React, TypeScript, Tailwind CSS, and modular hooks. Designed with a dark JSR-inspired theme, typewriter animations, scroll-aware UI, custom favicon/logo branding, and production-ready architecture — suitable for portfolio or real-world deployments.
 
-[Watch Live App](https://ai-chat-bot-app-seven.vercel.app/)
+[Watch Live App](https://cosmax.vercel.app/)
+
+---
+
+## Preview
+
+![CosmaX Logo](./src/assets/favicon.svg)  
+![CosmaX Chat UI](./screenshots/chat-ui.png)
+
+---
 
 ## Features
 
-- Gemini Pro API Integration
-- Typewriter animation using a custom useTypewriter hook
-- Dark/Light Mode toggle with useTheme.ts
-- Model Selector Sidebar UI ready
-- Real-time chat bubbles with timestamps
-- Sticky footer and scroll-to-bottom behavior
-- Fully responsive macOS-style UI
-- Clean modular project structure
+- **Gemini API Integration** (real-time chat responses)  
+- **Typewriter animation** for bot messages (`useTypewriter` hook)  
+- **CosmaX dark theme** (JSR-style background with particles & gradients)  
+- **Custom Favicon & Branding** (robotics-inspired SVG logo)  
+- **Scroll-to-bottom button** with smooth Framer Motion animations  
+- **Chat bubbles with timestamps** styled with glassmorphism  
+- **Compact Hero transition** — logo moves from center to corner once chat begins  
+- **Responsive macOS-style layout** (mobile & desktop optimized)  
+- **Clean modular file structure** with TypeScript typing for messages  
+
+---
 
 ## Technologies Used
 
-| Frontend     | Styling       | AI API               | Other        |
-| ------------ | ------------- | -------------------- | ------------ |
-| React + Vite | Tailwind CSS  | Gemini 1.5 Flash API | TypeScript   |
-| Custom Hooks | Responsive UI | REST fetch           | ESLint, .env |
+| Frontend       | Styling       | AI API             | Other Tools   |
+| -------------- | ------------- | ------------------ | ------------- |
+| React + Vite   | Tailwind CSS  | Gemini API (1.5)   | TypeScript    |
+| Framer Motion  | Responsive UI | REST fetch         | ESLint, .env  |
+
+---
 
 ## Project Structure
 
 ```
 src/
-├── assets/
-├── components/
-├── hooks/
-├── pages/
-├── services/
-├── types/
-├── utils/
+├── assets/              # Icons, logos, particles config
+├── components/          # UI components (ChatMessage, Composer, Logo, etc.)
+├── hooks/               # Custom hooks (useTypewriter)
+├── pages/               # Main pages (Home.tsx)
+├── services/            # Gemini API calls
+├── types/               # Global TypeScript types (chat.ts)
 ├── App.tsx
 ├── index.tsx
 ```
 
+---
+
 ## Challenges and Solutions
 
-### 1. Gemini API trimming first word
+### 1. Local Storage & Data Security  
+- Issue: Avoided storing full user objects in localStorage.  
+- Fix: Cleaned up all state handling so only safe message arrays are kept in memory.  
 
-- Issue: Gemini API occasionally returned incomplete first words.
-- Fix: Added whitespace padding and adjusted `useTypewriter.ts` with `trimStart()`.
-- Also added regex cleanup in gemini.ts to fix merged words.
+### 2. Typewriter Cut-off Issue  
+- Issue: First word sometimes got trimmed.  
+- Fix: Added dummy padding in `useTypewriter.ts` and trimmed with regex cleanup.  
 
-### 2. TypeScript ESLint warnings
+### 3. UI Refinements  
+- Dark JSR-style background unified across **ParticlesBackground.tsx** & **Home.tsx**.  
+- Added **scroll-to-bottom floating button** with Framer Motion.  
+- Adjusted Composer’s positioning via `bottomOffset` prop for flexible layouts.  
 
-- Resolved `prefer-const`, `implicit any` errors by explicitly typing parameters and constants.
+### 4. Branding & Favicon  
+- Designed multiple **robotics-inspired SVG favicons** (emerald, teal, yellow-cyan, dark variants).  
+- Fixed spacing between favicon and page title.  
 
-### 3. UI and UX refinement
-
-- Focused on clean, modern styling with Tailwind.
-- Ensured keyboard accessibility and layout responsiveness.
+---
 
 ## Getting Started
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/archit-react/ai-chatbot.git
-cd ai-chatbot
+git clone https://github.com/archit-react/cosmax.git
+cd cosmax
 ```
 
 ### 2. Install Dependencies
@@ -77,7 +96,7 @@ Create a `.env` file:
 VITE_GEMINI_API_KEY=your_gemini_api_key
 ```
 
-Get your key from: https://aistudio.google.com/app/apikey
+Get your key from: [Google AI Studio](https://aistudio.google.com/app/apikey)
 
 ### 4. Start Development Server
 
@@ -85,22 +104,28 @@ Get your key from: https://aistudio.google.com/app/apikey
 npm run dev
 ```
 
+---
+
 ## Future Improvements
 
-- Streaming responses
-- Voice input support
-- Unit testing with Vitest and React Testing Library
-- Firebase sync for chat history
-- Multi-language support
+- **Streaming responses** (token-by-token like ChatGPT)  
+- **Voice input + speech output**  
+- **Persistent chat history with Firebase/DB**  
+- **Unit tests** with Vitest + RTL  
+- **Multi-language support**  
+
+---
 
 ## Author
 
-Archit Sharma  
-Front-End Developer | Chandigarh, India
+**Archit Sharma**  
+Full-Stack Developer | Chandigarh, India  
 
-- GitHub: https://github.com/archit-react
-- LinkedIn: https://www.linkedin.com/in/archit-react
+- GitHub: [archit-react](https://github.com/archit-react)  
+- LinkedIn: [archit-react](https://www.linkedin.com/in/archit-react)  
+
+---
 
 ## License
 
-MIT License
+MIT License  
