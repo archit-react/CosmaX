@@ -65,11 +65,12 @@ export default function Composer({
             placeholder="Type your message"
             aria-label="Chat input"
             className="w-full p-3 pr-12 rounded-lg
-                       bg-[#0d1114]/80 text-zinc-100 outline-none
-                       border border-cyan-400/55
-                       focus:ring-2 focus:ring-cyan-400
-                       placeholder:uppercase placeholder:tracking-wide placeholder:font-bold
-                       disabled:opacity-50"
+                      bg-white/5 backdrop-blur-md text-zinc-100 outline-none
+        border border-white/10
+           shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]
+           focus:ring-2 focus:ring-white/20 focus:border-white/20
+            placeholder:uppercase placeholder:tracking-wide placeholder:font-bold
+            disabled:opacity-50"
           />
         </div>
 
@@ -90,8 +91,8 @@ export default function Composer({
             mass: 0.5,
           }}
           className="inline-flex items-center justify-center select-none
-                     rounded-md px-6 py-3 font-bold uppercase tracking-wide
-                     bg-amber-400 text-zinc-900
+                     rounded-2xl px-6 py-3 font-bold uppercase tracking-wide
+                     bg-amber-400 backdrop-blur-md  text-zinc-900
                      shadow-[0_4px_0_0_rgba(255,255,255,0.9),0_6px_0_0_rgba(0,0,0,0.25)]
                      border border-amber-300
                      hover:brightness-105 active:brightness-100"

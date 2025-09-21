@@ -179,7 +179,7 @@ export default function ChatInterface() {
         <div
           ref={containerRef}
           aria-live="polite"
-          className="flex-1 overflow-y-auto px-4 pt-6 pb-28
+          className="flex-1 overflow-y-auto px-4 pt-24 pb-28
                      scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent"
         >
           <div className="mx-auto max-w-2xl space-y-4">
