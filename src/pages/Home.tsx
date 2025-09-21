@@ -42,12 +42,6 @@ export default function ChatInterface() {
     return () => clearInterval(interval);
   }, [isLoading]);
 
-  // focus the input on mount (input lives inside Composer; target by ID)
-  useEffect(() => {
-    const el = document.getElementById("chat-input") as HTMLInputElement | null;
-    el?.focus();
-  }, []);
-
   // show/hide "scroll to bottom" button
   useEffect(() => {
     const container = containerRef.current;
@@ -150,6 +144,14 @@ export default function ChatInterface() {
       {/* Floating CosmaX hero logo (center → top-left) */}
       <motion.div
         className="fixed z-20 pointer-events-none"
+        initial={{
+          top: "33%",
+          left: "50%",
+          x: "-50%",
+          y: "-50%",
+          scale: 1,
+          opacity: 1,
+        }}
         animate={
           compactHero
             ? {
