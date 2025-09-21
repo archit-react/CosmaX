@@ -1,4 +1,3 @@
-// src/components/ChatMessage.tsx
 import { useTypewriter } from "../hooks/useTypewriter";
 
 type ChatMessageProps = {
@@ -35,7 +34,7 @@ export default function ChatMessage({
         "mr-auto",
         "bg-white/5",
         "border border-white/10",
-        "text-cyan-100", // keep cyan text for bot role
+        "text-cyan-100",
         "backdrop-blur-md",
         "shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_16px_-6px_rgba(0,0,0,0.45)]",
       ].join(" ");
@@ -44,10 +43,12 @@ export default function ChatMessage({
     <div
       className={`w-fit max-w-[80%] px-4 py-2 rounded-xl text-sm ${bubbleClass}`}
     >
-      <p className="whitespace-pre-wrap">{displayContent}</p>
+      <p className="whitespace-pre-wrap font-['Audiowide'] tracking-wide">
+        {displayContent}
+      </p>
       {timestamp && (
         <div
-          className={`text-xs mt-1 ${
+          className={`text-xs mt-1 font-['Audiowide'] tracking-widest ${
             isUser ? "text-yellow-200/70" : "text-cyan-200/70"
           }`}
         >
