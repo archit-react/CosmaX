@@ -8,10 +8,6 @@ A futuristic AI chatbot interface powered by Google Gemini API, built with React
 
 ## Preview
 
-![CosmaX Logo](./src/assets/favicon.svg)  
-
-<br><br>
-
 ![CosmaX UI](./screenshots/cosmax-ui.png)
 
 <br><br>
