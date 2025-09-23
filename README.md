@@ -1,6 +1,6 @@
 # CosmaX (AI ChatBot · Gemini + React + TypeScript)
 
-A futuristic AI chatbot interface powered by Google Gemini API, built with React, TypeScript, Tailwind CSS, and modular hooks. Designed with a dark JSR-inspired theme, typewriter animations, scroll-aware UI, custom favicon/logo branding, and production-ready architecture suitable for portfolio or real-world deployments.
+A futuristic AI chatbot interface powered by Google Gemini API, built with React, TypeScript, Tailwind CSS, and modular hooks. Designed with a dark JSR-inspired theme, typewriter animations, scroll-aware UI, custom favicon/logo branding, and well-structured architecture.
 
 [Live Project](https://cosmax.vercel.app/)
 
