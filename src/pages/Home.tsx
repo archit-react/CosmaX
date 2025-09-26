@@ -102,27 +102,28 @@ export default function ChatInterface() {
       setInput("");
       setIsLoading(true);
 
-      try {
-        const reply = await askGemini(input);
-        const botMessage: ChatMessageType = {
-          id: Date.now().toString(),
-          role: "bot",
-          content: reply || "I couldn't generate a response. Please try again.",
-          timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, botMessage]);
-      } catch (error) {
-        console.error("Gemini Error:", error);
-        const errorMessage: ChatMessageType = {
-          id: Date.now().toString(),
-          role: "bot",
-          content: "Sorry, I encountered an error. Please try again later.",
-          timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-      } finally {
-        setIsLoading(false);
-      }
+     try {
+       const res = await askGemini(input); // returns GeminiReply
+       const botMessage: ChatMessageType = {
+         id: Date.now().toString(),
+         role: res.success ? "bot" : "system",
+         content:
+           res.reply || "I couldn't generate a response. Please try again.",
+         timestamp: res.timestamp || new Date().toISOString(),
+       };
+       setMessages((prev) => [...prev, botMessage]);
+     } catch (error) {
+       console.error("Gemini Error:", error);
+       const errorMessage: ChatMessageType = {
+         id: Date.now().toString(),
+         role: "system",
+         content: "Sorry, I encountered an error. Please try again later.",
+         timestamp: new Date().toISOString(),
+       };
+       setMessages((prev) => [...prev, errorMessage]);
+     } finally {
+       setIsLoading(false);
+     }
     },
     [input, isLoading]
   );

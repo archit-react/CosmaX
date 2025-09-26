@@ -15,8 +15,9 @@ export default function ChatMessage({
   const isUser = role === "user";
   const isSystem = role === "system";
 
-  const typedContent = useTypewriter(content, 20);
-  const displayContent = role === "bot" ? typedContent : content;
+  //  call hook correctly (object) and use only the string
+  const { displayText } = useTypewriter({ text: content, speed: 20 });
+  const displayContent = role === "bot" ? displayText : content;
 
   const bubbleClass = isUser
     ? [
@@ -24,7 +25,7 @@ export default function ChatMessage({
         "bg-white/5",
         "border border-white/10",
         "text-amber-200",
-        "backdrop-blur-md",
+        "backdrop-blur-md", 
         "shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_16px_-6px_rgba(0,0,0,0.45)]",
       ].join(" ")
     : isSystem
@@ -42,11 +43,9 @@ export default function ChatMessage({
     <div
       className={`w-fit max-w-[85%] sm:max-w-[75%] px-4 py-2 rounded-xl ${bubbleClass}`}
     >
-      <p
-        className="whitespace-pre-wrap break-words font-['Audiowide']
-                   tracking-wide text-sm sm:text-base leading-relaxed"
-      >
-        {displayContent}
+      <p className="whitespace-pre-wrap break-words font-['Audiowide'] tracking-wide text-sm sm:text-base leading-relaxed">
+        {/* always render a string to avoid React crashing */}
+        {displayContent ?? ""}
       </p>
       {timestamp && (
         <div

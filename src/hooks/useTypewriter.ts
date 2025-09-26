@@ -1,26 +1,49 @@
-import { useEffect, useState } from "react";
+// src/hooks/useTypewriter.ts
+import { useState, useEffect } from "react";
 
-export function useTypewriter(originalText: string, speed = 20) {
-  const [displayed, setDisplayed] = useState("");
+interface UseTypewriterProps {
+  text: string;
+  speed?: number;
+  delay?: number;
+}
+
+export const useTypewriter = ({
+  text,
+  speed = 50,
+  delay = 0,
+}: UseTypewriterProps) => {
+  const [displayText, setDisplayText] = useState("");
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    const padding = "##"; // Dummy invisible characters
-    const paddedText = padding + originalText;
-    let index = 0;
+    setDisplayText("");
+    setIsComplete(false);
 
-    setDisplayed(""); // Reset on new input
+    if (!text) {
+      setIsComplete(true);
+      return;
+    }
 
-    const interval = setInterval(() => {
-      const nextChar = paddedText.charAt(index);
-      if (index >= padding.length) {
-        setDisplayed((prev) => prev + nextChar); // Start showing after padding
-      }
-      index++;
-      if (index >= paddedText.length) clearInterval(interval);
-    }, speed);
+    const startTyping = () => {
+      let currentIndex = 0;
 
-    return () => clearInterval(interval);
-  }, [originalText, speed]);
+      const typeNextCharacter = () => {
+        if (currentIndex < text.length) {
+          setDisplayText(text.slice(0, currentIndex + 1));
+          currentIndex++;
+          // Use setTimeout with a function reference, not string
+          setTimeout(typeNextCharacter, speed);
+        } else {
+          setIsComplete(true);
+        }
+      };
 
-  return displayed;
-}
+      // Start typing after delay
+      setTimeout(typeNextCharacter, delay);
+    };
+
+    startTyping();
+  }, [text, speed, delay]);
+
+  return { displayText, isComplete };
+};

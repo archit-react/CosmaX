@@ -1,61 +1,122 @@
-// Handles the Gemini API request and returns a cleaned response
-export async function askGemini(prompt: string): Promise<string> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+// src/services/gemini.ts
 
-  // Fail fast if API key is missing
-  if (!apiKey) {
-    throw new Error(
-      "Gemini API key is missing. Set VITE_GEMINI_API_KEY in .env"
-    );
+export type GeminiReply = {
+  success: boolean;
+  reply: string;
+  modelUsed: string;
+  tokensUsed: number;
+  timestamp: string;
+};
+
+// Label only; server decides actual model.
+export const DEFAULT_MODEL = "gemini-1.5-flash";
+
+interface BackendResponse {
+  success?: boolean;
+  reply?: string;
+  modelUsed?: string;
+  tokensUsed?: number;
+  timestamp?: string;
+  error?: string;
+}
+
+/**
+ * Ask the backend (proxying Gemini) for a reply.
+ * - Never sends API keys from the browser
+ * - Lets the backend choose the actual model (no model is sent)
+ * - Times out gently to avoid stuck spinners
+ */
+export async function askGemini(
+  prompt: string,
+  opts?: { signal?: AbortSignal; timeoutMs?: number }
+): Promise<GeminiReply> {
+  const timeoutMs = opts?.timeoutMs ?? 25_000;
+
+  // Simple guard to avoid empty requests
+  const cleanPrompt = String(prompt ?? "").trim();
+  if (!cleanPrompt) {
+    return {
+      success: false,
+      reply: "Please enter a prompt.",
+      modelUsed: DEFAULT_MODEL,
+      tokensUsed: 0,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  // AbortController for request timeout / cancellation
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), timeoutMs);
+  if (opts?.signal) {
+    opts.signal.addEventListener("abort", () => ac.abort(), { once: true });
   }
 
   try {
-    // Call Gemini API with user's prompt
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt.trim() }] }],
-        }),
-      }
-    );
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      // Do NOT send a model; the backend resolves a working one.
+      body: JSON.stringify({ prompt: cleanPrompt }),
+      signal: ac.signal,
+    });
 
-    // Throw if API returns error status
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(
-        `Gemini API error: ${errorData.error?.message || res.statusText}`
-      );
+    const data = await safeJson<BackendResponse>(res);
+
+    if (!res.ok || !data?.success) {
+      const msg =
+        data?.reply ||
+        data?.error ||
+        `Request failed with status ${res.status}`;
+      throw new Error(msg);
     }
 
-    // Extract the generated reply
-    const data = await res.json();
-    const rawReply: string = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawReply) return "Gemini returned an empty response.";
+    return {
+      success: true,
+      reply: cleanup(String(data.reply ?? "")),
+      modelUsed: String(data.modelUsed ?? DEFAULT_MODEL),
+      tokensUsed: Number(data.tokensUsed ?? 0),
+      timestamp: String(data.timestamp ?? new Date().toISOString()),
+    };
+  } catch (e) {
+    const message =
+      e instanceof Error
+        ? e.name === "AbortError"
+          ? "Request timed out. Please try again."
+          : e.message
+        : String(e);
 
-    // Cleanup: fix word merges, spacing, and formatting
-    const cleaned: string = rawReply
-      .replace(/([a-z])([A-Z])/g, "$1 $2") // "Idon't" → "I don't"
-      .replace(/([a-zA-Z])(\d)/g, "$1 $2") // "FIFA3" → "FIFA 3"
-      .replace(
-        /(^|\s)([a-z])([a-z]{2,})/g,
-        (match: string, space: string, firstLetter: string, rest: string) => {
-          const commonWords = ["ay", "i", "ello", "eah"];
-          return commonWords.includes(rest.toLowerCase())
-            ? `${space}${firstLetter.toUpperCase()}${rest}`
-            : match;
-        }
-      )
-      .replace(/\s+/g, " ") // Collapse extra whitespace
-      .trim();
-
-    return cleaned;
-  } catch (error) {
-    console.error("askGemini() failed:", error);
-    return `Failed to fetch Gemini response: ${
-      error instanceof Error ? error.message : String(error)
-    }`;
+    return {
+      success: false,
+      reply: `Failed to fetch Gemini response: ${message}`,
+      modelUsed: DEFAULT_MODEL,
+      tokensUsed: 0,
+      timestamp: new Date().toISOString(),
+    };
+  } finally {
+    clearTimeout(timer);
   }
+}
+
+/** Safely parse JSON; returns undefined on failure (no `any`) */
+async function safeJson<T>(res: Response): Promise<T | undefined> {
+  try {
+    return (await res.json()) as T;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Light cleanup for readability in bubbles */
+function cleanup(text: string): string {
+  if (!text) return "Gemini returned an empty response.";
+
+  // Optional: strip surrounding code fences if present
+  const fenced = text.match(/^```[\s\S]*?\n([\s\S]*?)```$/);
+  const body = fenced ? fenced[1] : text;
+
+  return body
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/([a-zA-Z])(\d)/g, "$1 $2")
+    .replace(/\s+/g, " ")
+    .trim();
 }

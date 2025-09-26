@@ -1,3 +1,4 @@
+// src/tyoes/chat.ts
 export type ChatMessage = {
   id: string;
   role: "user" | "bot" | "system";
