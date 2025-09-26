@@ -31,7 +31,7 @@ A futuristic AI chatbot interface powered by **Google Gemini API**, now upgraded
 
 - **UI & Branding**  
   - Typewriter animation for bot replies (`useTypewriter` hook)  
-  - CosmaX dark theme with JSR-style background + particles  
+  - CosmaX dark themed background + particles (space-inspired)
   - Custom favicon & logo branding (robotics-inspired)  
   - Scroll-to-bottom floating button with smooth Framer Motion animations  
   - Chat bubbles with timestamps styled with glassmorphism  
@@ -100,7 +100,7 @@ src/
 - Fix: Implemented fallback strategy → tries multiple candidates until success  
 
 ### 4. UI Refinements  
-- Unified dark JSR-style background across components  
+- Unified dark background across components  
 - Added Framer Motion scroll-to-bottom button  
 - Refined Composer positioning for clean responsive layouts  
 
@@ -148,7 +148,7 @@ npm run dev
 
 ## Future Improvements
 
-- Streaming responses (token-by-token, ChatGPT-style)  
+- Streaming responses (token-by-token)  
 - Voice input + speech output  
 - Persistent chat history (Firebase/DB)  
 - Authentication (Google login, per-user limits)  
