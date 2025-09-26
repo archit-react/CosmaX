@@ -1,6 +1,6 @@
 # CosmaX (AI ChatBot · Gemini + React + TypeScript + Vercel Backend)
 
-A futuristic AI chatbot interface powered by **Google Gemini API**, now upgraded to a **full-stack architecture**. Built with React, TypeScript, Tailwind CSS, and Express-style serverless APIs on Vercel. Features a secure backend proxy for Gemini API calls, lightweight auth/rate-limiting, and a dark JSR-inspired theme with animated UI.
+A futuristic AI chatbot interface powered by **Google Gemini API**, upgraded to a **full-stack architecture**. Built with React, TypeScript, Tailwind CSS, and Express-style serverless APIs on Vercel. Features a secure backend proxy for Gemini API calls, lightweight auth/rate-limiting, and a dark JSR-inspired theme with animated UI.
 
 [Live Project](https://cosmax.vercel.app/)
 
