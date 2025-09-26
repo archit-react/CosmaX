@@ -88,7 +88,7 @@ app.post("/api/chat", async (req, res) => {
       });
     }
 
-    // 🔒 Check shared-secret header (must match frontend’s VITE_COSMAX_CLIENT_KEY)
+
     if (clientKey && req.headers["x-cosmax-key"] !== clientKey) {
       return res.status(403).json({
         success: false,
