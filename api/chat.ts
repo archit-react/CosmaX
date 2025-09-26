@@ -1,15 +1,24 @@
 // api/chat.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+/**
+ * CONFIG
+ * - COSMAX_CLIENT_KEY: if set, requests must include header `x-cosmax-key` with the same value.
+ * - RATE_LIMIT_COUNT / RATE_LIMIT_WINDOW_MS: simple in-memory per-IP limiter.
+ */
+const REQUIRED_SHARED_KEY = process.env.COSMAX_CLIENT_KEY || "9zF!n8P@k2LmQ4xUv6YhRt$eW1a"; 
+const RATE_LIMIT_COUNT = Number(process.env.RATE_LIMIT_COUNT ?? 30); // 
+const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? 60_000); // 
+
 // Try these in order. If one 403/404s, we fall through to the next.
 const MODEL_CANDIDATES = [
-  "gemini-2.5-flash", 
-  "gemini-2.5-pro", 
-  "gemini-2.5-flash-lite", 
-  "gemini-2.0-flash-001", 
-];
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash-001",
+] as const;
 
-// Minimal types for Gemini responses (enough to avoid `any`)
+// ---- Types to avoid `any` ----
 type GeminiPart = { text?: string };
 type GeminiContent = { parts?: GeminiPart[] };
 type GeminiCandidate = { content?: GeminiContent };
@@ -20,11 +29,48 @@ type GeminiResponse = GeminiUsage &
     candidates?: GeminiCandidate[];
   };
 
+// ---- Tiny in-memory rate limiter (per-IP) ----
+// NOTE: In serverless this resets when the function instance is cold-started or rotated.
+// Good enough as a speed bump; use a shared store for stronger guarantees.
+type Bucket = { count: number; resetAt: number };
+const buckets = new Map<string, Bucket>();
+
+function rateLimit(key: string): {
+  ok: boolean;
+  remaining: number;
+  reset: number;
+} {
+  const now = Date.now();
+  const b = buckets.get(key);
+  if (!b || now > b.resetAt) {
+    const resetAt = now + RATE_LIMIT_WINDOW_MS;
+    buckets.set(key, { count: 1, resetAt });
+    return { ok: true, remaining: RATE_LIMIT_COUNT - 1, reset: resetAt };
+  }
+  if (b.count >= RATE_LIMIT_COUNT) {
+    return { ok: false, remaining: 0, reset: b.resetAt };
+  }
+  b.count += 1;
+  return { ok: true, remaining: RATE_LIMIT_COUNT - b.count, reset: b.resetAt };
+}
+
+// ---- Helper to get client IP without `any` ----
+function getClientIp(req: VercelRequest): string {
+  const fwd = (req.headers["x-forwarded-for"] as string | undefined)
+    ?.split(",")[0]
+    ?.trim();
+  if (fwd) return fwd;
+
+  // Narrow socket type safely without `any`
+  const socketLike = req.socket as unknown as { remoteAddress?: string | null };
+  return socketLike?.remoteAddress ?? "unknown";
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS for local dev / simple deployments
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-cosmax-key");
   if (req.method === "OPTIONS") return res.status(200).end();
 
   if (req.method !== "POST") {
@@ -37,9 +83,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
+  // ---- Lightweight shared-secret check (optional) ----
+  if (REQUIRED_SHARED_KEY) {
+    const provided = (
+      req.headers["x-cosmax-key"] as string | undefined
+    )?.trim();
+    if (!provided || provided !== REQUIRED_SHARED_KEY) {
+      // Minimal logging: do not log prompt or header values.
+      console.warn("[auth] missing/invalid x-cosmax-key");
+      return res.status(401).json({
+        success: false,
+        reply: "Unauthorized",
+        modelUsed: "unknown",
+        tokensUsed: 0,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  // ---- Per-IP rate limit ----
+  const ip = getClientIp(req);
+  const rl = rateLimit(ip);
+  res.setHeader("X-RateLimit-Limit", String(RATE_LIMIT_COUNT));
+  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
+  res.setHeader("X-RateLimit-Reset", String(rl.reset));
+  if (!rl.ok) {
+    return res.status(429).json({
+      success: false,
+      reply: `Rate limit exceeded. Try again after ${Math.max(
+        0,
+        rl.reset - Date.now()
+      )}ms.`,
+      modelUsed: "unknown",
+      tokensUsed: 0,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
+      console.error("[config] Missing GEMINI_API_KEY");
       return res.status(500).json({
         success: false,
         reply: "Server configuration error - API key missing",
@@ -59,23 +143,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         timestamp: new Date().toISOString(),
       });
     }
-    // ✅ From here on, use the validated/trimmed value (fixes “possibly undefined”)
     const cleanPrompt = prompt.trim();
 
-    async function callGemini(model: string) {
+    async function callGemini(model: (typeof MODEL_CANDIDATES)[number]) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       const doFetch = () =>
         fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          // 🔒 Do NOT log this payload.
           body: JSON.stringify({
             contents: [{ parts: [{ text: cleanPrompt }] }],
           }),
         });
 
       let upstream = await doFetch();
-
-      // Try to parse JSON safely without `any`
       let data: GeminiResponse | undefined;
       try {
         data = (await upstream.json()) as GeminiResponse;
@@ -104,6 +186,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let lastMsg = "Gemini API error";
 
     for (const model of MODEL_CANDIDATES) {
+      const started = Date.now();
       const { upstream, data } = await callGemini(model);
 
       if (upstream.ok) {
@@ -111,6 +194,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ??
           "I couldn’t generate a reply.";
         const tokensUsed = Number(data?.usageMetadata?.totalTokenCount ?? 0);
+
+        // Minimal success log, no prompt:
+        console.info(
+          `[chat] model=${model} status=${upstream.status} ms=${
+            Date.now() - started
+          }`
+        );
 
         return res.status(200).json({
           success: true,
@@ -121,13 +211,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
-      // record error for this candidate
       lastStatus = upstream.status;
       lastMsg =
         data?.error?.message || data?.error?.status || "Gemini API error";
 
-      // If this is a pure access/not-found issue, try next candidate
+      // Minimal error log (no prompt):
+      console.warn(
+        `[chat] model=${model} failed status=${upstream.status} msg="${lastMsg}"`
+      );
+
       if (upstream.status === 403 || upstream.status === 404) {
+        // try next candidate
         continue;
       }
 

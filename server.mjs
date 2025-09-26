@@ -1,28 +1,40 @@
-// server.mjs
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
 
+// --- Rate limiting middleware (50 requests per 5 minutes per IP) ---
+const limiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 50, // limit each IP to 50 requests per windowMs
+  message: {
+    success: false,
+    reply: "Too many requests, please try again later.",
+    modelUsed: "unavailable",
+    tokensUsed: 0,
+    timestamp: new Date().toISOString(),
+  },
+});
+
 app.use(cors());
 app.use(express.json());
+app.use("/api/", limiter); // apply to /api/* routes
 
 /**
  * IMPORTANT:
  * Put a model you’re MOST likely to have access to first.
- * For AI Studio free keys, gemini-2.0-flash often works even when 1.5-flash(-002) doesn’t.
  */
 const MODEL_CANDIDATES = [
-  "gemini-2.5-flash", // best free-tier balance
-  "gemini-2.5-pro", // if you need higher quality
-  "gemini-2.5-flash-lite", // cheapest, lightweight
-  "gemini-2.0-flash-001", // fallback
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash-001",
 ];
-
 
 async function callGemini({ apiKey, prompt, model }) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -64,10 +76,23 @@ async function callGemini({ apiKey, prompt, model }) {
 app.post("/api/chat", async (req, res) => {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
+    const clientKey = process.env.COSMAX_CLIENT_KEY;
+
     if (!apiKey) {
       return res.status(500).json({
         success: false,
         reply: "Server error: Missing GEMINI_API_KEY",
+        modelUsed: "unknown",
+        tokensUsed: 0,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // 🔒 Check shared-secret header (must match frontend’s VITE_COSMAX_CLIENT_KEY)
+    if (clientKey && req.headers["x-cosmax-key"] !== clientKey) {
+      return res.status(403).json({
+        success: false,
+        reply: "Forbidden: Invalid client key",
         modelUsed: "unknown",
         tokensUsed: 0,
         timestamp: new Date().toISOString(),
@@ -85,7 +110,8 @@ app.post("/api/chat", async (req, res) => {
       });
     }
 
-    console.log("🚀 /api/chat hit. Trying models in order:", MODEL_CANDIDATES);
+    console.log("🚀 /api/chat hit (prompt length:", prompt.length, ")");
+    console.log("Trying models:", MODEL_CANDIDATES);
 
     let lastStatus = 0;
     let lastMsg = "Gemini API error";
@@ -110,19 +136,17 @@ app.post("/api/chat", async (req, res) => {
         });
       }
 
-      // Record and log the error for this candidate
+      // Record + log error without exposing prompt
       lastStatus = upstream.status;
       const msg =
         data?.error?.message || data?.error?.status || "Gemini API error";
       lastMsg = msg;
       console.warn(`❌ ${model} failed [${upstream.status}]: ${msg}`);
 
-      // If it's a pure access / not-found issue, try the next model
       if (upstream.status === 403 || upstream.status === 404) {
         continue;
       }
 
-      // For other errors (500, etc.), bail out immediately
       return res.status(upstream.status).json({
         success: false,
         reply: msg,
@@ -132,7 +156,6 @@ app.post("/api/chat", async (req, res) => {
       });
     }
 
-    // All candidates tried but access/not-found
     return res.status(lastStatus || 404).json({
       success: false,
       reply: `${lastMsg} — tried: ${MODEL_CANDIDATES.join(", ")}`,

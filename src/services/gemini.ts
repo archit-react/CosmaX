@@ -9,7 +9,7 @@ export type GeminiReply = {
 };
 
 // Label only; server decides actual model.
-export const DEFAULT_MODEL = "gemini-1.5-flash";
+export const DEFAULT_MODEL = "gemini-2.5-flash";
 
 interface BackendResponse {
   success?: boolean;
@@ -52,10 +52,16 @@ export async function askGemini(
   }
 
   try {
+    // 🔐 Build headers (conditionally include the shared secret)
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    const shared = import.meta.env.VITE_COSMAX_CLIENT_KEY as string | undefined;
+    if (shared) headers["x-cosmax-key"] = shared;
+
     const res = await fetch("/api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      // Do NOT send a model; the backend resolves a working one.
+      headers,
       body: JSON.stringify({ prompt: cleanPrompt }),
       signal: ac.signal,
     });
@@ -110,7 +116,6 @@ async function safeJson<T>(res: Response): Promise<T | undefined> {
 function cleanup(text: string): string {
   if (!text) return "Gemini returned an empty response.";
 
-  // Optional: strip surrounding code fences if present
   const fenced = text.match(/^```[\s\S]*?\n([\s\S]*?)```$/);
   const body = fenced ? fenced[1] : text;
 
