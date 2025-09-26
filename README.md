@@ -1,6 +1,6 @@
-# CosmaX (AI ChatBot · Gemini + React + TypeScript)
+# CosmaX (AI ChatBot · Gemini + React + TypeScript + Vercel Backend)
 
-A futuristic AI chatbot interface powered by Google Gemini API, built with React, TypeScript, Tailwind CSS, and modular hooks. Designed with a dark JSR-inspired theme, typewriter animations, scroll-aware UI, custom favicon/logo branding, and well-structured architecture.
+A futuristic AI chatbot interface powered by **Google Gemini API**, now upgraded to a **full-stack architecture**. Built with React, TypeScript, Tailwind CSS, and Express-style serverless APIs on Vercel. Features a secure backend proxy for Gemini API calls, lightweight auth/rate-limiting, and a dark JSR-inspired theme with animated UI.
 
 [Live Project](https://cosmax.vercel.app/)
 
@@ -20,61 +20,89 @@ A futuristic AI chatbot interface powered by Google Gemini API, built with React
 
 ## Features
 
-- **Gemini API Integration** (real-time chat responses)  
-- **Typewriter animation** for bot messages (`useTypewriter` hook)  
-- **CosmaX dark theme** (JSR-style background with particles & gradients)  
-- **Custom Favicon & Branding** (robotics-inspired SVG logo)  
-- **Scroll-to-bottom button** with smooth Framer Motion animations  
-- **Chat bubbles with timestamps** styled with glassmorphism  
-- **Compact Hero transition** — logo moves from center to corner once chat begins  
-- **Responsive macOS-style layout** (mobile & desktop optimized)  
-- **Clean modular file structure** with TypeScript typing for messages  
+- **Full-stack Gemini API Integration**  
+  - Serverless backend (`/api/chat`) proxies requests → API key never exposed  
+  - Automatic model fallback (`gemini-2.5-flash`, `gemini-2.5-pro`, etc.)  
+
+- **Security & Reliability**  
+  - shared-secret auth (`x-cosmax-key`) between frontend ↔ backend  
+  - Simple per-IP rate limiting (prevents spam/abuse)  
+  - Minimal logging (no full prompts stored)  
+
+- **UI & Branding**  
+  - Typewriter animation for bot replies (`useTypewriter` hook)  
+  - CosmaX dark theme with JSR-style background + particles  
+  - Custom favicon & logo branding (robotics-inspired)  
+  - Scroll-to-bottom floating button with smooth Framer Motion animations  
+  - Chat bubbles with timestamps styled with glassmorphism  
+  - Responsive macOS-style layout (desktop + mobile)  
+
+- **Smart UX**  
+  - Hero section → logo transitions from center to corner when chat begins  
+  - Optimized file structure with clean TypeScript types  
 
 ---
 
 ## Technologies Used
 
-| Frontend       | Styling       | AI API             | Other Tools   |
-| -------------- | ------------- | ------------------ | ------------- |
-| React + Vite   | Tailwind CSS  | Gemini API (1.5)   | TypeScript    |
-| Framer Motion  | Responsive UI | REST fetch         | ESLint, .env  |
+| Frontend       | Styling       | Backend / API      | AI Model             | Other Tools   |
+| -------------- | ------------- | ------------------ | -------------------- | ------------- |
+| React + Vite   | Tailwind CSS  | Vercel Serverless  | Gemini 2.5 (Flash/Pro) | TypeScript    |
+| Framer Motion  | Responsive UI | Express-style APIs | REST fetch proxy     | ESLint, .env  |
 
 ---
 
 ## Project Structure
 
 ```
+api/
+└── chat.ts              # Backend proxy: Gemini API call + auth + rate limiting
+
 src/
-├── assets/              # Icons, logos, particles config
-├── components/          # UI components (ChatMessage, Composer, Logo, etc.)
-├── hooks/               # Custom hooks (useTypewriter)
-├── pages/               # Main pages (Home.tsx)
-├── services/            # Gemini API calls
-├── types/               # Global TypeScript types (chat.ts)
-├── App.tsx
-├── index.tsx
+ ┣ assets/
+ ┃ ┣ favicon.svg
+ ┃ ┗ react.svg
+ ┣ components/
+ ┃ ┣ ChatMessage.tsx
+ ┃ ┣ Composer.tsx
+ ┃ ┣ CosmaXLogo.tsx
+ ┃ ┣ ParticlesBackground.tsx
+ ┃ ┣ ScrollToBottom.tsx
+ ┃ ┗ SocialLinks.tsx
+ ┣ hooks/
+ ┃ ┗ useTypewriter.ts
+ ┣ pages/
+ ┃ ┗ Home.tsx
+ ┣ services/
+ ┃ ┗ gemini.ts           # Frontend → backend API wrapper
+ ┣ types/
+ ┃ ┗ chat.ts
+ ┣ App.tsx
+ ┣ index.css
+ ┣ main.tsx
+ ┗ vite-env.d.ts
 ```
 
 ---
 
 ## Challenges and Solutions
 
-### 1. Local Storage & Data Security  
-- Issue: Avoided storing full user objects in localStorage.  
-- Fix: Cleaned up all state handling so only safe message arrays are kept in memory.  
+### 1. API Key Security  
+- Issue: Frontend-only setup exposed API key risk  
+- Fix: Added backend `/api/chat` route. The key now lives only on the server  
 
-### 2. Typewriter Cut-off Issue  
-- Issue: First word sometimes got trimmed.  
-- Fix: Added dummy padding in `useTypewriter.ts` and trimmed with regex cleanup.  
+### 2. Abuse Prevention  
+- Added per-IP rate limiting in backend (configurable via `.env`)  
+- Added shared-secret header (`x-cosmax-key`) so only allowed frontends can call API  
 
-### 3. UI Refinements  
-- Dark JSR-style background unified across **ParticlesBackground.tsx** & **Home.tsx**.  
-- Added **scroll-to-bottom floating button** with Framer Motion.  
-- Adjusted Composer’s positioning via `bottomOffset` prop for flexible layouts.  
+### 3. Model Reliability  
+- Gemini API models sometimes return `403/404`  
+- Fix: Implemented fallback strategy → tries multiple candidates until success  
 
-### 4. Branding & Favicon  
-- Designed multiple **robotics-inspired SVG favicons** (emerald, teal, yellow-cyan, dark variants).  
-- Fixed spacing between favicon and page title.  
+### 4. UI Refinements  
+- Unified dark JSR-style background across components  
+- Added Framer Motion scroll-to-bottom button  
+- Refined Composer positioning for clean responsive layouts  
 
 ---
 
@@ -95,13 +123,20 @@ npm install
 
 ### 3. Configure Environment Variables
 
-Create a `.env` file:
+Create a `.env.local` file:
 
 ```env
-VITE_GEMINI_API_KEY=your_gemini_api_key
-```
+# Gemini API Key (server-only, never exposed to browser)
+GEMINI_API_KEY=your_gemini_api_key
 
-Get your key from: [Google AI Studio](https://aistudio.google.com/app/apikey)
+# Optional: simple shared-secret auth (frontend + backend must match)
+COSMAX_CLIENT_KEY=your-strong-secret
+VITE_COSMAX_CLIENT_KEY=your-strong-secret
+
+# Optional: basic per-IP rate limiting
+RATE_LIMIT_COUNT=30
+RATE_LIMIT_WINDOW_MS=60000
+```
 
 ### 4. Start Development Server
 
@@ -113,11 +148,12 @@ npm run dev
 
 ## Future Improvements
 
-- **Streaming responses** (token-by-token like ChatGPT)  
-- **Voice input + speech output**  
-- **Persistent chat history with Firebase/DB**  
-- **Unit tests** with Vitest + RTL  
-- **Multi-language support**  
+- Streaming responses (token-by-token, ChatGPT-style)  
+- Voice input + speech output  
+- Persistent chat history (Firebase/DB)  
+- Authentication (Google login, per-user limits)  
+- Multi-language support  
+- Unit tests with Vitest + RTL  
 
 ---
 
